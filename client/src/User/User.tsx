@@ -9,13 +9,12 @@ function User() {
   const userData = location.state;
 
   useEffect(() => {
-    if (!userData?.success) {
+    if (!userData) {
       navigate('/login');
     }
   }, [userData, navigate]);
 
   return <userContext.Provider value={userData}>
-
       <UserComponent />
     </userContext.Provider>
 }

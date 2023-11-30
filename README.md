@@ -30,11 +30,11 @@ To run the project locally, follow these steps:
 
 # Clone the repository: 
    ```bash
-   git clone https://github.com/ShenhavBarziv/client.git
+   git clone https://github.com/ShenhavBarziv/Julius
    ```
 # Navigate to the project directory:
 ```bash
-cd employee-management-system
+cd ./Julius
 ```
 # Install dependencies for the frontend and backend:
 ```bash
@@ -54,4 +54,4 @@ npm start
 # Author
 Shenhav Barziv
 
-Feel free to explore the functionalities of the Employee Management System! If you encounter any issues or have suggestions for improvement, please don't hesitate to reach out.
+Feel free to explore the functionalities of the Employee Management System! If you encounter any issues or security hole or have suggestions for improvement, please don't hesitate to reach out.

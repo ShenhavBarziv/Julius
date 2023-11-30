@@ -26,18 +26,18 @@ function Login() {
       await axios.post("http://localhost:5000/login",{
           email,password
       }).then(res =>{
-        if (res.status === 200) {
-          console.log('Login successful');
-          console.log("connected successfully");
-          navigate('/user', { state: res.data });
-          // Redirect or perform other actions
-        } else {
-          // Handle other status codes as needed
-          console.log(`Login failed with status: ${res.status}`);
+        console.log(res.data.user);
+          if(res.data.user)
+          {
+            console.log("connected successfully");
+            navigate('/user', { state: res.data.user });
+          }
+          else
+          {
+            console.log("Login failed");
           setMessage("email or password are incorrect")
-        }
-        console.log(res.data);
-      })
+          }
+      })   
   }
   catch(e){
       console.log(e);
