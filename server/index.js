@@ -6,7 +6,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 require('dotenv').config();
-const {AddRegister, Login, List, GetUserByEmail, ListReg, DeleteReg, ApproveReg} = require("./mongo/conn");
+const {AddRegister, Login, List, GetUserByEmail, ListReg, DeleteReg, ApproveReg, DeleteUser, GetUserById, UpdateUser } = require("./mongo/conn");
 const PORT = 5000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -54,6 +54,17 @@ app.post('/reg', async (req, res) => {
   console.log(req.body.id);
   res.json(await ApproveReg(req.body.id));
 });
+app.delete('/del', async(req, res) =>{
+  console.log(req.body);
+  res.json(await DeleteUser(req.body.id));
+})
+app.get('/EditUser', async(req,res) => {
+  res.json(await GetUserById(req.query.id))
+})
+app.post('/SaveUserChanges', async(req,res) =>{
+  data = req.body;
+  res.json(await UpdateUser(data.userId,data.userData));
+})
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

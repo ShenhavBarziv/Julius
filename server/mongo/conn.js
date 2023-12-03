@@ -23,7 +23,7 @@ async function AddRegister(user) {
       console.log(`User with email ${user.email} already exists in the register collection.`);
       return 409; // Conflict status code
     }
-
+    user.admin = false;
     const collection = db.collection(registerCollectionName);
     await collection.insertOne(user);
     console.log(`${user.name} inserted successfully.\n`);
@@ -94,6 +94,7 @@ async function ListReg() {
     const db = await Connect();
     const collection = db.collection(registerCollectionName);
     const data = await collection.find().toArray();
+    if(!data){return {};}
     return data;
   } catch (err) {
     console.error(`Error finding users: ${err}`);
@@ -146,5 +147,74 @@ async function ApproveReg(id) {
     return { "code": 500 }; // Internal Server Error status code
   }
 }
+async function DeleteUser(id) {
+  try {
+    const db = await Connect();
+    const collection = db.collection(userCollectionName);
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
 
-module.exports = { AddRegister, Login, List, GetUserByEmail, ListReg, DeleteReg, ApproveReg };
+    if (result.deletedCount === 1) {
+      console.log(`User with id ${id} deleted successfully from the user collection.`);
+      return {"code":200}; // Success status code
+    } else {
+      msg = `User with id ${id} not found in the user collection.`;
+      console.log(msg);
+      return {"code":404,msg}; // Not Found status code
+    }
+  } catch (err) {
+    console.error(`Error deleting user from user collection: ${err}`);
+    return {"code":500,"msg":"Error"};
+  }
+}
+async function GetUserById(userId)
+{
+  try {
+    console.log(userId);
+    const db = await Connect();
+    const collection = db.collection(userCollectionName);
+    const user = await collection.findOne({ _id: new ObjectId(userId) });
+    
+    if (user) {
+      const keysToKeep = ['email', 'name', 'job', 'birthDate', 'phoneNumber', 'position', 'hireDate', 'admin'];
+    const ans = Object.fromEntries(
+      Object.entries(user).filter(([key]) => keysToKeep.includes(key))
+    );
+      console.log('Found user:', ans);
+      return ans;
+    } else {
+      console.log('User not found');
+      return {};
+    }
+  } catch (err) {
+    console.error(`Error finding user by ID: ${err}`);
+  }
+}
+async function UpdateUser(userId, userData) {
+  try {
+    client = new MongoClient(process.env.URI);
+    await client.connect();
+    
+    const db = client.db(dbName);
+    const collection = db.collection(userCollectionName);
+
+    const result = await collection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: userData }
+    );
+
+    if (result.modifiedCount === 1) {
+      console.log(`User with ID ${userId} updated successfully.`);
+      return { code: 200, msg: 'User updated successfully' };
+    } else {
+      console.log(`User with ID ${userId} not found.`);
+      return { code: 404, msg: 'User not found' };
+    }
+  } catch (error) {
+    console.error(`Error updating user: ${error}`);
+    return { code: 500, msg: 'Error' };
+  } finally {
+    await client.close();
+  }
+}
+
+module.exports = { AddRegister, Login, List, GetUserByEmail, ListReg, DeleteReg, ApproveReg, DeleteUser, GetUserById, UpdateUser };

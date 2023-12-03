@@ -7,11 +7,11 @@ import Navbar from './Navbar/Navbar';
 import './App.css';
 import { BrowserRouter, Routes, Route,} from 'react-router-dom';
 import Admin from './Admin/Admin';
-import Change from './Change/Change';
-import Delete from './Delete/Delete';
+import Edit from './Edit/Edit';
 import Approve from './Approve/Approve';
 import List from './List/List';
 import Profile from './Profile/Profile';
+import EditUser from './EditUser/EditUser';
 function App() {
   return (
     <BrowserRouter>
@@ -20,10 +20,10 @@ function App() {
       <Route path="/SignUp" element={<SignUp />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/admin" element={<Admin />}/>
-      <Route path="/admin/delete-user" element={<Delete />}/>
-      <Route path="/admin/change-values" element={<Change />}/>
+      <Route path="/admin/edit" element={<Edit />}/>
       <Route path="/admin/approve" element={<Approve />}/>
       <Route path="/employee-list" element={<List />}/>
+      <Route path="/admin/editUser" element={<EditUser />} />
       <Route path="/navbar" element={<Navbar />}/>
       <Route path ="/" element={<Home />} />
       <Route path="/*" element={<NotFound />} />{/*it's like a 404 page*/}

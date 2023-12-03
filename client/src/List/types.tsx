@@ -7,4 +7,5 @@ export type UserData = {
   phoneNumber: string;
   hireDate: string;
   birthDate: string;
+  admin: boolean;
 };

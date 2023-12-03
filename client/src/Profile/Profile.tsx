@@ -1,6 +1,6 @@
 // Profile.js
 import React, { useEffect, useState } from 'react';
-import "./Profile.css"; // Import the CSS file
+import "./Profile.css";
 import axios from 'axios';
 import { UserData, ProfileProps } from './types';
 import Navbar from '../Navbar/Navbar';
@@ -9,15 +9,15 @@ const email = "shenhavbarziv@gmail.com";
 
 function Profile() {
   const [userData, setUserData] = useState<UserData | null>(null);
-
+  const [msg, SetMsg] = useState("Loading user profile...");
   useEffect(() => {
     axios.get(`/profile?email=${email}`)
       .then(response => {
-        const { id, password, ...filteredData } = response.data;
-        setUserData(filteredData);
+        setUserData(response.data);
       })
       .catch(error => {
         console.error('Error fetching user profile:', error);
+        SetMsg("Error");
       });
   }, []);
 
@@ -35,7 +35,7 @@ function Profile() {
           ))}
         </ul>
       ) : (
-        <p className='loading'>Loading user profile...</p>
+        <p className='loading'>{msg}</p>
       )}
     </div>
     </>
