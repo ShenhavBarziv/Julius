@@ -4,7 +4,6 @@ import "./signup.css";
 import axios from 'axios';
 function SignUp() {
   const navigate = useNavigate();
-  const [message, setMessage] = useState('')
   const [userData, setUserData] = useState({
     email: '',
     password: '',
@@ -34,30 +33,31 @@ function SignUp() {
     //navigate('/login');
     try{
       await axios.post("http://localhost:5000/register",userData).then(res =>{
-        if (res.status === 201) {
+        console.log(res.data)
+        if (res.data.code === 201) {
           // Successful signup
           alert("new user created successfully")
           navigate('/login', { state: userData.email });
           // Redirect or perform other actions
-        } else if (res.status === 409) {
+        } else if (res.data.code === 409) {
           // User already exists
-          setMessage('User already exists');
+          alert('User already exists');
         } else {
           // Handle other status codes as needed
-          setMessage("error");
+          alert("error");
           console.log(`Signup failed with status: ${res.status}`);
         }
         console.log(res.data);
       })
   }
   catch(e){
-      console.log(e);
+    alert("error");
+    console.log(e);
   }
   };
 
   return (
     <>
-    <p>{message}</p>
     <div className='SignUpForm'>
       <h1>Sign Up</h1>
       <form onSubmit={handleSubmit}>

@@ -26,21 +26,21 @@ function Login() {
       await axios.post("http://localhost:5000/login",{
           email,password
       }).then(res =>{
-        console.log(res.data.user);
+        console.log(res.data);
           if(res.data.user)
           {
-            console.log("connected successfully");
-            navigate('/user', { state: res.data.user });
+            navigate('/profile');//, { state: res.data.user.email }
           }
           else
           {
-            console.log("Login failed");
-          setMessage("email or password are incorrect")
+            console.log(res.data);
+            setMessage(res.data.msg);
           }
       })   
   }
   catch(e){
       console.log(e);
+      setMessage("Error")
   }
   }
   return (
