@@ -1,6 +1,6 @@
 const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
-
+const { compare, hash } = require('bcryptjs');
 const dbName = "users";
 const registerCollectionName = "register";
 const userCollectionName = "users";
@@ -25,6 +25,7 @@ async function AddRegister(user) {
     }
     user.admin = false;
     const collection = db.collection(registerCollectionName);
+    user.password = await hash(user.password, 10)
     await collection.insertOne(user);
     console.log(`${user.name} inserted successfully.\n`);
     return 201; // Successfully inserted status code
@@ -38,27 +39,36 @@ async function Login(email, password) {
   try {
     const db = await Connect();
     let collection = db.collection(userCollectionName);
-    let msg = "msg";
-    const user = await collection.findOne({ email, password });
+    
+    let user = await collection.findOne({ email });
 
-    if (!user) {
-      collection = db.collection(registerCollectionName);
-      const user1 = await collection.findOne({ email, password });
+    if (user) {
+      const passwordMatch = await compare(password, user.password);
 
-      if (user1) {
-        msg = "Your user is not approved.\nPlease contact your supervisor";
+      if (passwordMatch) {
+        return { user, msg: "Connected successfully" };
       } else {
-        msg = "email or password are incorrect";
+        return { msg: "Email or password are incorrect" };
       }
-    } else {
-      msg = "connected successfully";
     }
 
-    console.log(user);
-    return { user, msg };
+    // No user found in the first collection, checking the second collection
+    collection = db.collection(registerCollectionName);
+    user = await collection.findOne({ email });
+
+    if (user) {
+      const passwordMatch = await compare(password, user.password);
+
+      if (passwordMatch) {
+        return { msg: "Your user is not approved. Please contact your supervisor" };
+      }
+    }
+
+    // No user found in the second collection either
+    return { msg: "Email or password are incorrect" };
   } catch (err) {
-    console.error(`Error finding user: ${err}`);
-    throw err;
+    console.error("Error during login:", err);
+    return { msg: "An error occurred during login" };
   }
 }
 
@@ -73,7 +83,7 @@ async function List() {
     throw err;
   }
 }
-
+/*
 async function GetUserByEmail(email) {
   try {
     const db = await Connect();
@@ -89,6 +99,7 @@ async function GetUserByEmail(email) {
     throw err;
   }
 }
+*/
 async function ListReg() {
   try {
     const db = await Connect();
@@ -215,4 +226,4 @@ async function UpdateUser(userId, userData) {
   }
 }
 
-module.exports = { AddRegister, Login, List, GetUserByEmail, ListReg, DeleteReg, ApproveReg, DeleteUser, GetUserById, UpdateUser };
+module.exports = { AddRegister, Login, List, ListReg, DeleteReg, ApproveReg, DeleteUser, GetUserById, UpdateUser };

@@ -2,7 +2,7 @@ import React, { type FormEvent, useState, useEffect } from 'react';
 import "./login.css";
 import axios from "axios";
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { useCookies } from "react-cookie";
+
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();

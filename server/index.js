@@ -12,7 +12,7 @@ app.use(cors({
   credentials: true,
 }));
 require('dotenv').config();
-const {AddRegister, Login, List, GetUserByEmail, ListReg, DeleteReg, ApproveReg, DeleteUser, GetUserById, UpdateUser } = require("./mongo/conn");
+const {AddRegister, Login, List, ListReg, DeleteReg, ApproveReg, DeleteUser, GetUserById, UpdateUser } = require("./mongo/conn");
 const PORT = 5000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -25,12 +25,15 @@ app.post('/login', async(req, res) => {
       res.cookie("token", token, {
        withCredentials: true,
        httpOnly: false,
+       sameSite: "None",
+       //secure: true,
      });
     }
     res.status(200).json(data);
 });
 app.post('/register', async(req, res) => {
     user = filterKeys(req.body,['email','password','name','job','birthDate','phoneNumber','position','hireDate'])//the filter is for unwanted fields that hackers can add in the request(for example: admin:true)
+    console.log(user);
     code = await AddRegister(user)
     res.json({code});
     //201 for successfully created 409 for conflict
@@ -133,7 +136,6 @@ async function UserVerification(token) {
     return { status: false };
   }
 }
-
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

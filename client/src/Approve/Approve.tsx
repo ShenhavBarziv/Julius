@@ -51,7 +51,6 @@ function Approve() {
     try {
       console.log('Approving user with id: ', id);
       const response = await axios.post('http://localhost:5000/approve', { id },{ withCredentials: true });
-      console.log(response.data);
       if(response.data.status !== 200)
       {
         if(typeof response.data.status === 'string')
