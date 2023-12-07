@@ -109,15 +109,14 @@ async function DeleteReg(id) {
 
     if (result.deletedCount === 1) {
       console.log(`User with id ${id} deleted successfully from the register collection.`);
-      return {"code":200}; // Success status code
+      return {status:200}; // Success status code
     } else {
-      msg = `User with id ${id} not found in the register collection.`;
-      console.log(msg);
-      return {"code":404,msg}; // Not Found status code
+      console.log(`User with id ${id} not found in the register collection.`);
+      return {status:404}; // Not Found status code
     }
   } catch (err) {
     console.error(`Error deleting user from register collection: ${err}`);
-    return {"code":500,"msg":"Error"};
+    return {status:500};
   }
 }
 
@@ -137,14 +136,14 @@ async function ApproveReg(id) {
       await registerCollection.deleteOne({ _id: new ObjectId(id) });
 
       console.log(`User with id ${id} approved and moved to the users collection.`);
-      return { "code": 200 }; // Success status code
+      return { status: 200 }; // Success status code
     } else {
       console.log(`User with id ${id} not found in the register collection.`);
-      return { "code": 404 }; // Not Found status code
+      return { status: 404 }; // Not Found status code
     }
   } catch (err) {
     console.error(`Error approving user in register collection: ${err}`);
-    return { "code": 500 }; // Internal Server Error status code
+    return { status: 500 }; // Internal Server Error status code
   }
 }
 async function DeleteUser(id) {
@@ -155,15 +154,14 @@ async function DeleteUser(id) {
 
     if (result.deletedCount === 1) {
       console.log(`User with id ${id} deleted successfully from the user collection.`);
-      return {"code":200}; // Success status code
+      return {status:200};
     } else {
-      msg = `User with id ${id} not found in the user collection.`;
-      console.log(msg);
-      return {"code":404,msg}; // Not Found status code
+      console.log(`User with id ${id} not found in the user collection.`);
+      return {status:404};
     }
   } catch (err) {
     console.error(`Error deleting user from user collection: ${err}`);
-    return {"code":500,"msg":"Error"};
+    return {status:500};
   }
 }
 async function GetUserById(userId)

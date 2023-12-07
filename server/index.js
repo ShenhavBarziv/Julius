@@ -1,31 +1,48 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require("cors")
+const cookieParser = require("cookie-parser");
 const app = express()
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(cors())
+const jwt = require('jsonwebtoken');
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
 require('dotenv').config();
 const {AddRegister, Login, List, GetUserByEmail, ListReg, DeleteReg, ApproveReg, DeleteUser, GetUserById, UpdateUser } = require("./mongo/conn");
 const PORT = 5000;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.post('/login', async(req, res) => {
-    //console.log("m",req.body)
     const { email, password } = req.body;
     const data = await Login(email,password);
-    console.log(data);
+    if(data.user)
+    {
+      const token = createSecretToken(data.user._id);
+      res.cookie("token", token, {
+       withCredentials: true,
+       httpOnly: false,
+     });
+    }
     res.status(200).json(data);
 });
 app.post('/register', async(req, res) => {
-    console.log(req.body);//here hackers can exploit
-    user = filterKeys(req.body,['email','password','name','job','birthDate','phoneNumber','position','hireDate'])//the filter is for unwanted fields that hackers can add in the request
+    user = filterKeys(req.body,['email','password','name','job','birthDate','phoneNumber','position','hireDate'])//the filter is for unwanted fields that hackers can add in the request(for example: admin:true)
     code = await AddRegister(user)
     res.json({code});
     //201 for successfully created 409 for conflict
 });
 app.get('/list', async(req,res) => {
-  res.json(await List())
+  const userVerification = req.cookies ? await UserVerification(req.cookies.token) : { status: false };
+  if(userVerification.status){
+    res.json({status:true,data: await List(),admin:userVerification.user.admin})
+  }else {
+    res.json({status:false})
+  }
+  
 });
 function filterKeys(data, allowedKeys) {
   const filteredData = {};
@@ -36,35 +53,87 @@ function filterKeys(data, allowedKeys) {
   });
   return filteredData;
 }
-app.get('/profile', async(req,res) =>{
-  console.log(req.query);
-  data = await GetUserByEmail(req.query.email);
-  console.log(data);
-  res.json(data);
+app.get('/profile', async (req, res) => {
+  const userVerification = req.cookies ? await UserVerification(req.cookies.token) : { status: false };
+  res.json(userVerification);
 });
-app.get('/approve', async(req,res) =>{
-  res.json(await ListReg())
+app.get('/approve', async (req, res) => {
+  const userVerification = req.cookies ? await UserVerification(req.cookies.token) : { status: false };
+  if (userVerification.status && userVerification.user.admin) {
+    res.json({status: true, data: await ListReg()});
+  } else if (userVerification.status) {
+    res.json({ status: 'notAdmin', data:{} });
+  } else {
+    res.json({ status: 'notLoggedIn', data:{} });
+  }
 });
-app.delete('/reg', async (req, res) => {
-  console.log(req.body.id);
-  res.json(await DeleteReg(req.body.id));
+app.delete('/approve', async (req, res) => {
+  const userVerification = req.cookies ? await UserVerification(req.cookies.token) : { status: false };
+  if (userVerification.status && userVerification.user.admin) {
+    res.json(await DeleteReg(req.body.id));
+  } else {
+    res.json({ status: 'Access Denied: You are not authorized to perform this action.' });
+  }
 });
 
-app.post('/reg', async (req, res) => {
-  console.log(req.body.id);
-  res.json(await ApproveReg(req.body.id));
+app.post('/approve', async (req, res) => {
+  const userVerification = req.cookies ? await UserVerification(req.cookies.token) : { status: false };
+  if (userVerification.status && userVerification.user.admin) {
+    res.json(await ApproveReg(req.body.id));
+  } else {
+    res.json({ status: 'Access Denied: You are not authorized to perform this action.' });
+  }
 });
 app.delete('/del', async(req, res) =>{
-  console.log(req.body);
-  res.json(await DeleteUser(req.body.id));
+  const userVerification = req.cookies ? await UserVerification(req.cookies.token) : { status: false };
+  if (userVerification.status && userVerification.user.admin) {
+    res.json({status:true, data: await DeleteUser(req.body.id),admin: userVerification.user.admin})
+  } else {
+    res.json({ status: ''});
+  }
+  res.json();
 })
 app.get('/EditUser', async(req,res) => {
-  res.json(await GetUserById(req.query.id))
+  const userVerification = req.cookies ? await UserVerification(req.cookies.token) : { status: false };
+  if (userVerification.status) {
+    const userData = await GetUserById(req.query.id);
+    res.json({status:true, data: userData, admin: userVerification.user.admin})
+  } else {
+    res.json({ status: ''});
+  }
+
 })
 app.post('/SaveUserChanges', async(req,res) =>{
   data = req.body;
-  res.json(await UpdateUser(data.userId,data.userData));
+  const userVerification = req.cookies ? await UserVerification(req.cookies.token) : { status: false };
+  if (userVerification.status && userVerification.user.admin) {
+    res.json({status: true,data: await UpdateUser(data.userId,data.userData), admin: userVerification.user.admin});
+  } else {
+    res.json({ status: 'Access Denied: You are not authorized to perform this action.' });
+  }
 })
+function createSecretToken(id) {
+  return jwt.sign({ id }, process.env.TOKEN_KEY, {
+    expiresIn: 24 * 60 * 60,
+  });
+};
+async function UserVerification(token) {
+  if (!token) {
+    return { status: false };
+  }
+  try {
+    const data = await jwt.verify(token, process.env.TOKEN_KEY);
+    const user = await GetUserById(data.id);
+    if (Object.keys(user).length > 0) {
+      return { status: true, user: user };
+    } else {
+      return { status: false };
+    }
+  } catch (err) {
+    return { status: false };
+  }
+}
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

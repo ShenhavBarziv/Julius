@@ -1,28 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import "./List.css"
-import type { UserData } from "./types"
+import type { UserData,ResponeType } from "./types"
 import Navbar from '../Navbar/Navbar';
+import { useNavigate } from 'react-router-dom';
 
 function List() {
+  const navigate = useNavigate();
   const [data, setData] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
-    axios.get<UserData[]>('http://localhost:5000/list')
+    axios.get<ResponeType>('http://localhost:5000/list',{ withCredentials: true })
       .then(response => {
-        setData(response.data);
-        setLoading(false); // Set loading to false when data is fetched
+        if (!response.data.status) {
+          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          navigate('/login');
+        }
+        console.log(response.data)
+        setData(response.data.data);
+        setAdmin(response.data.admin);
+        setLoading(false);
       })
       .catch(error => {
         console.error('Error fetching data:', error);
-        setLoading(false); // Set loading to false in case of an error
+        setLoading(false);
       });
   }, []);  
 
   return (
     <>
-    <Navbar />
+    <Navbar admin={admin}/>
       {loading ? (
         <p className='loading'>Loading data...</p>
       ) : (

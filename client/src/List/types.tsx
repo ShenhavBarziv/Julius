@@ -9,3 +9,8 @@ export type UserData = {
   birthDate: string;
   admin: boolean;
 };
+export type ResponeType = {
+  status: boolean;
+  data: UserData[];
+  admin: boolean;
+}

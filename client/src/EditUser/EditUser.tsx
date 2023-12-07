@@ -3,18 +3,37 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../Navbar/Navbar';
 import type { UserData } from './types';
 import axios from 'axios';
+import { useCookies } from 'react-cookie';
 
 function EditUser() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   const userId = location.state;
   const [userData, setUserData] = useState<UserData | null>(null);
   const [msg, setMsg] = useState('Loading user profile...');
-
+  const [cookies, removeCookie] = useCookies(['token']);
+  const [admin, setAdmin] = useState(false);
   useEffect(() => {
-    axios.get(`/EditUser?id=${userId}`)
+    if (!cookies || !cookies.token) {
+      navigate('/login');
+    }
+    axios.get(`/EditUser?id=${userId}`,{ withCredentials: true })
       .then((response) => {
-        setUserData(response.data);
+        if(response.data.status)
+        {
+          if(response.data.admin)
+          {
+            setAdmin(true);
+            setUserData(response.data.data)
+          } else {
+            console.log(response.data)
+            alert("access denied");
+            navigate("/profile");
+          }
+        } else {
+          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          navigate("/login");
+        }
       })
       .catch((error) => {
         console.error('Error fetching user profile:', error);
@@ -33,13 +52,14 @@ function EditUser() {
     console.log(userData);
     axios.post("/SaveUserChanges",{userId, userData})
       .then((response) => {
-        if(response.data.code == 200)
+        if(response.data.data.code == 200)
         {
-            console.log(response.data.msg);
+            console.log(response.data.data.msg);
             navigate("/admin/edit");
         }
         else{
-            alert(response.data.msg)
+            alert(response.data.data.msg)
+            navigate("/profile")
         }
       })
       .catch((error) => {
@@ -50,7 +70,7 @@ function EditUser() {
 
   return (
     <>
-      <Navbar />
+      <Navbar admin={admin}/>
       <div className="user-profile">
         <h1>Edit User</h1>
         {userData ? (
