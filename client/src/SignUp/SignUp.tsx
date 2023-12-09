@@ -26,28 +26,19 @@ function SignUp() {
 
   async function handleSubmit(e:FormEvent){
     e.preventDefault();
-
-    // Perform your signup logic here with the userData
-    console.log('Sign-up data:', userData);
-    // Redirect to another page or perform other actions
-    //navigate('/login');
     try{
-      await axios.post("http://localhost:5000/register",userData).then(res =>{
-        console.log(res.data)
+      await axios.post("http://localhost:5000/register", userData, {withCredentials: true,})
+      .then(res =>{
         if (res.data.code === 201) {
-          // Successful signup
           alert("new user created successfully")
           navigate('/login', { state: userData.email });
-          // Redirect or perform other actions
         } else if (res.data.code === 409) {
-          // User already exists
           alert('User already exists');
+        } else if(res.data.code === 400) {
+          alert(res.data.msg);
         } else {
-          // Handle other status codes as needed
           alert("error");
-          console.log(`Signup failed with status: ${res.status}`);
         }
-        console.log(res.data);
       })
   }
   catch(e){
@@ -61,38 +52,37 @@ function SignUp() {
     <div className='SignUpForm'>
       <h1>Sign Up</h1>
       <form onSubmit={handleSubmit}>
-        {/* Render your form fields here */}
         <label>
           Email:
-          <input type="email" name="email" onChange={handleChange} required />
+          <input type="email" maxLength={50} name="email" onChange={handleChange} required />
         </label>
         <label>
           Password:
-          <input type="password" name="password" onChange={handleChange} required />
+          <input type="password" maxLength={30} name="password" onChange={handleChange} required />
         </label>
         <label>
           Name:
-          <input type="text" name="name" onChange={handleChange} required />
+          <input type="text" maxLength={20} name="name" onChange={handleChange} required />
         </label>
         <label>
           Job:
-          <input type="text" name="job" onChange={handleChange} required />
+          <input type="text" maxLength={20} name="job" onChange={handleChange} required />
         </label>
         <label>
           Birth Date:
-          <input type="text" name="birthDate" onChange={handleChange} required />
+          <input type="date" maxLength={10} name="birthDate" onChange={handleChange} required />
         </label>
         <label>
           Phone Number:
-          <input type="text" name="phoneNumber" onChange={handleChange} required />
+          <input type="text" maxLength={15} name="phoneNumber" onChange={handleChange} required />
         </label>
         <label>
           Position:
-          <input type="text" name="position" onChange={handleChange} required />
+          <input type="text" maxLength={15} name="position" onChange={handleChange} required />
         </label>
         <label>
           Hire Date:
-          <input type="text" name="hireDate" onChange={handleChange} required />
+          <input type="date" maxLength={10} name="hireDate" onChange={handleChange} required />
         </label>
         <button type="submit">Sign Up</button>
       </form>

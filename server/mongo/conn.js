@@ -122,7 +122,6 @@ async function DeleteReg(id) {
       console.log(`User with id ${id} deleted successfully from the register collection.`);
       return {status:200}; // Success status code
     } else {
-      console.log(`User with id ${id} not found in the register collection.`);
       return {status:404}; // Not Found status code
     }
   } catch (err) {
