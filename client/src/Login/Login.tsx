@@ -33,7 +33,7 @@ function Login() {
     try {
       await axios
         .post(
-          "http://localhost:5000/login",
+          "http://95.216.153.158:5000/api/login",
           {
             email,
             password,

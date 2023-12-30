@@ -19,7 +19,7 @@ function Edit() {
     if (!cookies || !cookies.token) {
       navigate('/login');
     }
-    axios.get<ResponeType>('http://localhost:5000/list',{ withCredentials: true })
+    axios.get<ResponeType>('http://95.216.153.158/api/list',{ withCredentials: true })
       .then(response => {
         console.log(response.data);
         if(response.data.status)
@@ -55,7 +55,7 @@ function Edit() {
   async function handleDelete(id: string) {
     try {
       console.log(`Deleting user with id: ${id}`);
-      const response = await axios.delete('http://localhost:5000/del', { data: { id }, withCredentials: true });
+      const response = await axios.delete('http://95.216.153.158/api/del', { data: { id }, withCredentials: true });
       console.log(response.data);
     } catch (error) {
       console.error(`Error deleting user: ${error}`);

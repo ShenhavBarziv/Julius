@@ -27,7 +27,7 @@ function SignUp() {
   async function handleSubmit(e:FormEvent){
     e.preventDefault();
     try{
-      await axios.post("http://localhost:5000/register", userData, {withCredentials: true,})
+      await axios.post("http://95.216.153.158/api/register", userData, {withCredentials: true,})
       .then(res =>{
         if (res.data.code === 201) {
           alert("new user created successfully")

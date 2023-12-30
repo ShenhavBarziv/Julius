@@ -15,7 +15,7 @@ function Admin() {
       navigate('/login');
     }
 
-    axios.get('/profile', { withCredentials: true })
+    axios.get('http://95.216.153.158/api/profile', { withCredentials: true })
       .then(response => {
         console.log(response.data);
         if (!response.data.status) {

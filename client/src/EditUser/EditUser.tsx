@@ -18,7 +18,7 @@ function EditUser() {
       navigate("/login");
     }
     axios
-      .get(`/EditUser?id=${userId}`, { withCredentials: true })
+      .get(`http://95.216.153.158/api/EditUser?id=${userId}`, { withCredentials: true })
       .then((response) => {
         if (response.data.status) {
           if (response.data.admin) {
@@ -49,7 +49,7 @@ function EditUser() {
 
   function handleSave() {
     axios
-      .post("/SaveUserChanges", { userId, userData })
+      .post("http://95.216.153.158/api/SaveUserChanges", { userId, userData })
       .then((response) => {
         if (response.data.data.code == 200) {
           navigate("/admin/edit");

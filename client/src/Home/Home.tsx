@@ -1,10 +1,20 @@
 // Home.tsx
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
+import axios from 'axios';
 
 function Home() {
+  useEffect(() => {
+    axios.get("/api",{ withCredentials: true })
+      .then(response => {
+        console.log(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching user profile:', error);
+      });
+  }, []);
   return (
     <div className="home-container">
       <h1>Welcome to the Employee Management System</h1>

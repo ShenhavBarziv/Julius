@@ -7,13 +7,14 @@ const jwt = require("jsonwebtoken");
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: "http://localhost:80",
-    credentials: true,
-  })
-);
-require("dotenv").config();
+// app.use(
+//   cors({
+//     origin: "http://localhost",
+//     credentials: true,
+//   })
+// );
+const dotenv = require('dotenv');
+dotenv.config();
 const {
   AddRegister,
   Login,
@@ -26,6 +27,9 @@ const {
   UpdateUser,
 } = require("./mongo/conn");
 const PORT = 5000;
+app.use(cors({
+  origin: 'http://95.216.153.158',
+  credentials: true,}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 const disallowedTags = ["script", "iframe", "style"]; // Add more as needed
@@ -44,32 +48,35 @@ function validateInput(user) {
   }
   return true;
 }
-
-app.post("/login", async (req, res) => {
+app.get("/api", (req,res) => {
+  res.send("hiiiiiii")
+  
+})
+app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   if (validateInput(req.body)) {
     const data = await Login(email, password);
     if (data.user) {
       const token = createSecretToken(data.user._id);
       res.cookie("token", token, {
-        withCredentials: true,
         httpOnly: false,
         sameSite: "None",
-        secure: true,
+        secure: false,
       });
+      
       res.cookie("email", req.body.email, {
-        withCredentials: true,
         httpOnly: false,
         sameSite: "None",
-        secure: true,
+        secure: false,
       });
+      
     }
     res.status(200).json(data);
   } else {
     res.json({ msg: "One of the inputs is invalid" });
   }
 });
-app.post("/register", async (req, res) => {
+app.post("/api/register", async (req, res) => {
   user = filterKeys(req.body, [
     "email",
     "password",
@@ -96,7 +103,7 @@ app.post("/register", async (req, res) => {
     res.json({ code: 400, msg: "One of the inputs is invalid" });
   }
 });
-app.get("/list", async (req, res) => {
+app.get("/api/list", async (req, res) => {
   const userVerification = req.cookies
     ? await UserVerification(req.cookies.token)
     : { status: false };
@@ -119,13 +126,13 @@ function filterKeys(data, allowedKeys) {
   });
   return filteredData;
 }
-app.get("/profile", async (req, res) => {
+app.get("/api/profile", async (req, res) => {
   const userVerification = req.cookies
     ? await UserVerification(req.cookies.token)
     : { status: false };
   res.json(userVerification);
 });
-app.get("/approve", async (req, res) => {
+app.get("/api/approve", async (req, res) => {
   const userVerification = req.cookies
     ? await UserVerification(req.cookies.token)
     : { status: false };
@@ -137,7 +144,7 @@ app.get("/approve", async (req, res) => {
     res.json({ status: "notLoggedIn", data: {} });
   }
 });
-app.delete("/approve", async (req, res) => {
+app.delete("/api/approve", async (req, res) => {
   const userVerification = req.cookies
     ? await UserVerification(req.cookies.token)
     : { status: false };
@@ -150,7 +157,7 @@ app.delete("/approve", async (req, res) => {
   }
 });
 
-app.post("/approve", async (req, res) => {
+app.post("/api/approve", async (req, res) => {
   const userVerification = req.cookies
     ? await UserVerification(req.cookies.token)
     : { status: false };
@@ -162,7 +169,7 @@ app.post("/approve", async (req, res) => {
     });
   }
 });
-app.delete("/del", async (req, res) => {
+app.delete("/api/del", async (req, res) => {
   const userVerification = req.cookies
     ? await UserVerification(req.cookies.token)
     : { status: false };
@@ -177,7 +184,7 @@ app.delete("/del", async (req, res) => {
   }
   res.json();
 });
-app.get("/EditUser", async (req, res) => {
+app.get("/api/EditUser", async (req, res) => {
   const userVerification = req.cookies
     ? await UserVerification(req.cookies.token)
     : { status: false };
@@ -192,7 +199,7 @@ app.get("/EditUser", async (req, res) => {
     res.json({ status: "" });
   }
 });
-app.post("/SaveUserChanges", async (req, res) => {
+app.post("/api/SaveUserChanges", async (req, res) => {
   data = req.body;
   const userVerification = req.cookies
     ? await UserVerification(req.cookies.token)
@@ -210,6 +217,7 @@ app.post("/SaveUserChanges", async (req, res) => {
   }
 });
 function createSecretToken(id) {
+  
   return jwt.sign({ id }, process.env.TOKEN_KEY, {
     expiresIn: 24 * 60 * 60,
   });

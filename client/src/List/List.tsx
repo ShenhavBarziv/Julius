@@ -12,7 +12,7 @@ function List() {
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
-    axios.get<ResponeType>('http://localhost:5000/list',{ withCredentials: true })
+    axios.get<ResponeType>('http://95.216.153.158/api/list',{ withCredentials: true })
       .then(response => {
         if (!response.data.status) {
           document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";

@@ -23,7 +23,7 @@ function Profile() {
       navigate("/login");
     }
 
-    axios.get("/profile",{ withCredentials: true })
+    axios.get("http://95.216.153.158/api/profile",{ withCredentials: true })
       .then(response => {
         if(!response.data.status){
           document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";

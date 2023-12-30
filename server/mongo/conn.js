@@ -1,4 +1,4 @@
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient, ObjectId, ServerApiVersion  } = require('mongodb');
 require('dotenv').config();
 const { compare, hash } = require('bcryptjs');
 const dbName = "users";
@@ -6,7 +6,13 @@ const registerCollectionName = "register";
 const userCollectionName = "users";
 
 async function Connect() {
-  const client = new MongoClient(process.env.URI);
+  const client = new MongoClient(process.env.URI, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
   await client.connect();
   return client.db(dbName);
 }
