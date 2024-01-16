@@ -1,44 +1,48 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../../../../components/navbar/Navbar";
-import type { UserData } from "./types";
-import axios from "axios";
-import { useCookies } from "react-cookie";
+import React, { useEffect, useState } from 'react';
+import Navbar from '../../../../../../components/navbar/Navbar';
+import type { UserData, ResponeData } from './types';
+import editApi from '../../../../../../api/admin/editUserApi';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 
 function EditUser() {
   const navigate = useNavigate();
   const location = useLocation();
   const userId = location.state;
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [msg, setMsg] = useState("Loading user profile...");
-  const [cookies, removeCookie] = useCookies(["token"]);
+  const [msg, setMsg] = useState('Loading user profile...');
+  const [cookies, removeCookie] = useCookies(['token']);
   const [admin, setAdmin] = useState(false);
+
   useEffect(() => {
-    if (!cookies || !cookies.token) {
-      navigate("/login");
-    }
-    axios
-      .get(`http://95.216.153.158/api/EditUser?id=${userId}`, { withCredentials: true })
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        if (!cookies || !cookies.token) {
+          navigate('/login');
+        }
+
+        const response = await editApi.fetchData();
+
         if (response.data.status) {
           if (response.data.admin) {
             setAdmin(true);
-            setUserData(response.data.data);
+            setUserData(response.data.data.find((user: UserData) => user._id === userId) || null);
           } else {
-            alert("access denied");
-            navigate("/profile");
+            alert('Access denied');
+            navigate('/profile');
           }
         } else {
-          document.cookie =
-            "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          navigate("/login");
+          document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+          navigate('/login');
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching user profile:", error);
-        setMsg("Error");
-      });
-  }, [userId]);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        setMsg('Error');
+      }
+    };
+
+    fetchData();
+  }, [userId, navigate, cookies]);
 
   const handleInputChange = (key: string, value: string | boolean) => {
     setUserData((prevUserData: UserData | null) => ({
@@ -47,22 +51,21 @@ function EditUser() {
     }));
   };
 
-  function handleSave() {
-    axios
-      .post("http://95.216.153.158/api/SaveUserChanges", { userId, userData })
-      .then((response) => {
-        if (response.data.data.code == 200) {
-          navigate("/admin/edit");
-        } else {
-          alert(response.data.data.msg);
-          navigate("/profile");
-        }
-      })
-      .catch((error) => {
-        console.error("Error updating user data:", error);
-        alert("error");
-      });
-  }
+  const handleSave = async () => {
+    try {
+      const response = await editApi.saveUserChanges(userId, userData!);
+
+      if (response.data.data.code === 200) {
+        navigate('/admin/edit');
+      } else {
+        alert(response.data.data.msg);
+        navigate('/profile');
+      }
+    } catch (error) {
+      console.error('Error updating user data:', error);
+      alert('Error');
+    }
+  };
 
   return (
     <>
@@ -74,13 +77,13 @@ function EditUser() {
             {Object.entries(userData).map(([key, value]) => (
               <div key={key} className="form-group">
                 <label>{key}:</label>
-                {key === "admin" ? (
+                {key === 'admin' ? (
                   <input
                     type="checkbox"
                     checked={!!value}
                     onChange={(e) => handleInputChange(key, e.target.checked)}
                   />
-                ) : key === "birthDate" || key === "hireDate" ? (
+                ) : key === 'birthDate' || key === 'hireDate' ? (
                   <input
                     type="date"
                     value={value as string} // assuming value is a string

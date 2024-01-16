@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../../../../components/navbar/Navbar';
-import './styles.css'; // Import your new CSS file
-import axios from 'axios';
-import type { ResponeType, UserData } from './types';
+import './styles.css';
+import editApi from '../../../../api/admin/editUserApi';
+import type { UserData } from './types';
 import { useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 
@@ -18,32 +18,33 @@ function Edit() {
     if (!cookies || !cookies.token) {
       navigate('/login');
     }
-    axios.get<ResponeType>('http://95.216.153.158/api/list', { withCredentials: true })
-      .then(response => {
-        console.log(response.data);
-        if (response.data.status) {
-          if (response.data.admin) {
-            setAdmin(true);
-            setData(response.data.data);
-          }
-          else {
-            alert("access denied")
-            navigate("/profile");
-          }
-          setLoading(false);
+
+    try {
+      const response = await editApi.fetchData();
+      console.log(response.data);
+
+      if (response.data.status) {
+        if (response.data.admin) {
+          setAdmin(true);
+          setData(response.data.data);
         } else {
-          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          navigate("/login");
+          alert('Access denied');
+          navigate('/profile');
         }
         setLoading(false);
-
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-        setLoading(false);
-      });
+      } else {
+        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
   }
-  useEffect(() => { fetch() }, []);
+
+  useEffect(() => {
+    fetch();
+  }, []);
 
   async function handleEdit(id: string) {
     navigate('/admin/editUser', { state: id });
@@ -52,12 +53,11 @@ function Edit() {
   async function handleDelete(id: string) {
     try {
       console.log(`Deleting user with id: ${id}`);
-      const response = await axios.delete('http://95.216.153.158/api/del', { data: { id }, withCredentials: true });
+      const response = await editApi.deleteUser(id);
       console.log(response.data);
     } catch (error) {
       console.error(`Error deleting user: ${error}`);
-    }
-    finally {
+    } finally {
       fetch();
     }
   }
@@ -66,9 +66,9 @@ function Edit() {
     <>
       <Navbar admin={admin} />
       {loading ? (
-        <p className='loading'>Loading data...</p>
+        <p className="loading">Loading data...</p>
       ) : (
-        <table className='user-table'>
+        <table className="user-table">
           <thead>
             <tr>
               <th>Name</th>

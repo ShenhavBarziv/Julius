@@ -1,21 +1,15 @@
-// Profile.js
 import React, { useEffect, useState } from 'react';
-import "./Profile.css";
-import axios from 'axios';
-import { UserData } from './types';
-import Navbar from '../../components/navbar/Navbar';
+import "./styles.css";
 import { useCookies } from "react-cookie";
 import { useNavigate } from 'react-router-dom';
-
-const email = "shenhavbarziv@gmail.com";
-
-// ... (other imports)
+import Navbar from '../../components/navbar/Navbar';
+import profileApi from '../../api/user/profileApi';
 
 function Profile() {
   const navigate = useNavigate();
   const [cookies, removeCookie] = useCookies(['token']);
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [msg, SetMsg] = useState("Loading user profile...");
+  const [userData, setUserData] = useState(null);
+  const [msg, setMsg] = useState("Loading user profile...");
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
@@ -23,18 +17,14 @@ function Profile() {
       navigate("/login");
     }
 
-    axios.get("http://95.216.153.158/api/profile", { withCredentials: true })
-      .then(response => {
-        if (!response.data.status) {
-          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          navigate('/login');
-        }
-        setUserData(response.data.user);
-        setAdmin(response.data.user.admin);
+    profileApi.getUserProfile()
+      .then(user => {
+        setUserData(user);
+        setAdmin(user.admin);
       })
       .catch(error => {
         console.error('Error fetching user profile:', error);
-        SetMsg("Error");
+        setMsg("Error");
       });
   }, [cookies.token, navigate, removeCookie]);
 
@@ -47,7 +37,7 @@ function Profile() {
           <ul>
             {Object.entries(userData).map(([key, value]) => (
               <li key={key}>
-                <strong>{key}:</strong> {value.toString()}
+                <strong>{key}:</strong> {String(value)}
               </li>
             ))}
           </ul>
@@ -60,4 +50,3 @@ function Profile() {
 }
 
 export default Profile;
-

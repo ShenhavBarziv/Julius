@@ -9,3 +9,13 @@ export type UserData = {
   birthDate: string;
   admin: boolean;
 };
+export type ResponeData = {
+  data: {
+    status: boolean,
+    data: {
+      code: number,
+      msg: string,
+    },
+    admin: boolean,
+  }
+}

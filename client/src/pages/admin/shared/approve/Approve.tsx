@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../../../../components/navbar/Navbar';
 import './styles.css';
-import axios from 'axios';
-import type { ResponeType, UserData } from './types';
+import approveApi from '../../../../api/admin/approveApi';
 import { useNavigate } from 'react-router-dom';
+import type { UserData } from './types'; // Import the UserData type
 
 function Approve() {
   const [data, setData] = useState<UserData[]>([]);
@@ -12,83 +12,53 @@ function Approve() {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(false);
 
-  async function fetchData() {
+  const fetchData = async () => {
     try {
-      const response = await axios.get<ResponeType>('http://95.216.153.158/api/approve', { withCredentials: true });
-      console.log(response.data);
-      if (response.data.status === true) {
-        setData(response.data.data);
+      const result = await approveApi.fetchData();
+      if (result.success) {
+        setData(result.data);
         setAdmin(true);
+      } else if (result.message === 'notAdmin') {
+        alert('Access Denied: You are not an admin.');
+        navigate('/profile');
+      } else if (result.message === 'notLoggedIn') {
+        alert('Access Denied: Please log in to view this page.');
+        navigate('/login');
       }
-      else if (response.data.status == "notAdmin") {
-        alert("access denied");
-        navigate("/profile")
-      }
-      else {
-        navigate("/login");
-      }
-
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
-
-      if (axios.isAxiosError(error)) {
-        if (error.response && error.response.data.status) {
-          setStatus(error.response.data.status);
-        } else {
-          alert("Error");
-          navigate("/login")
-        }
-      }
+      alert('Error');
+      navigate('/login');
+    } finally {
       setLoading(false);
     }
-  }
-  useEffect(() => { fetchData(); }, []);
-  async function handleApprove(id: string) {
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [navigate]);
+
+  const handleApprove = async (id: string) => {
     try {
-      console.log('Approving user with id: ', id);
-      const response = await axios.post('http://95.216.153.158/api/approve', { id }, { withCredentials: true });
-      if (response.data.status !== 200) {
-        if (typeof response.data.status === 'string') {
-          alert(response.data.status);
-        }
-        else {
-          alert("User not found");
-        }
+      const result = await approveApi.approveUser(id);
+      if (!result.success) {
+        alert(result.message);
       }
-    } catch (error) {
-      console.error('Error approving user: ', error);
-      alert("Error");
     } finally {
       fetchData();
     }
-  }
+  };
 
-  async function handleDelete(id: string) {
+  const handleDelete = async (id: string) => {
     try {
-      console.log('Deleting user with id: ', id);
-      const response = await axios.delete('http://95.216.153.158/api/approve', {
-        data: { id },
-        withCredentials: true
-      });
-      console.log(response.data);
-      if (response.data.status !== 200) {
-        if (typeof response.data.status === 'string') {
-          alert(response.data.status);
-        } else {
-          alert("User not found");
-        }
+      const result = await approveApi.deleteUser(id);
+      if (!result.success) {
+        alert(result.message);
       }
-    } catch (error) {
-      console.error('Error deleting user: ', error);
-      alert("Error");
     } finally {
       fetchData();
     }
-  }
-
-
-
+  };
 
   return (
     <>

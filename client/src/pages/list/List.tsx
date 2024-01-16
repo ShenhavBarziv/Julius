@@ -1,9 +1,10 @@
+// components/List/List.tsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import "./List.css"
+import "./styles.css"
 import type { UserData, ResponeType } from "./types"
 import Navbar from '../../components/navbar/Navbar';
 import { useNavigate } from 'react-router-dom';
+import listApi from '../../api/user/listApi';
 
 function List() {
   const navigate = useNavigate();
@@ -12,13 +13,8 @@ function List() {
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
-    axios.get<ResponeType>('http://95.216.153.158/api/list', { withCredentials: true })
+    listApi.getListData()
       .then(response => {
-        if (!response.data.status) {
-          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          navigate('/login');
-        }
-        console.log(response.data)
         setData(response.data.data);
         setAdmin(response.data.admin);
         setLoading(false);

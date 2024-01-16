@@ -1,7 +1,7 @@
 import React, { type FormEvent, useState, useEffect } from "react";
-import "./login.css";
-import axios from "axios";
+import "./styles.css";
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import loginApi from "../../api/auth/loginApi";
 
 function Login() {
   const navigate = useNavigate();
@@ -11,6 +11,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const cookies = document.cookie
       .split(";")
@@ -30,23 +31,14 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
     try {
-      await axios
-        .post(
-          "http://95.216.153.158:5000/api/login",
-          {
-            email,
-            password,
-          },
-          { withCredentials: true }
-        )
-        .then((res) => {
-          if (res.data.user) {
-            navigate("/profile"); //, { state: res.data.user.email }
-          } else {
-            setMessage(res.data.msg);
-          }
-        });
+      const res = await loginApi.loginUser(email, password);
+      if (res.user) {
+        navigate("/profile"); //, { state: res.user.email }
+      } else {
+        setMessage(res.msg);
+      }
     } catch (e) {
       console.log(e);
       setMessage("Error");
@@ -54,6 +46,7 @@ function Login() {
       setLoading(false);
     }
   }
+
   return (
     <>
       <div className="login-container">

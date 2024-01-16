@@ -1,9 +1,10 @@
+// components/Admin/Admin.tsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/navbar/Navbar';
 import './styles.css';
 import { useCookies } from 'react-cookie';
-import axios from 'axios';
+import adminApi from '../../api/admin/adminApi';
 
 function Admin() {
   const [cookies, removeCookie] = useCookies(['token']);
@@ -15,25 +16,12 @@ function Admin() {
       navigate('/login');
     }
 
-    axios.get('http://95.216.153.158/api/profile', { withCredentials: true })
-      .then(response => {
-        console.log(response.data);
-        if (!response.data.status) {
-          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          navigate('/login');
-        }
-
-        const isAdminUser = response.data.user && response.data.user.admin;
-
-        if (isAdminUser) {
-          setIsAdmin(true);
-        } else {
-          alert('Access Denied');
-          navigate('/profile');
-        }
+    adminApi.checkAdminStatus()
+      .then(isAdminUser => {
+        setIsAdmin(isAdminUser);
       })
       .catch(error => {
-        console.error('Error fetching user profile:', error);
+        console.error('Error checking admin status:', error);
         alert('Error\nRedirecting to login');
         navigate('/login');
       });
