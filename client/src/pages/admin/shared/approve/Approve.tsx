@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../Navbar/Navbar';
-import './Approve.css';
+import Navbar from '../../../../components/navbar/Navbar';
+import './styles.css';
 import axios from 'axios';
 import type { ResponeType, UserData } from './types';
 import { useNavigate } from 'react-router-dom';
@@ -14,23 +14,20 @@ function Approve() {
 
   async function fetchData() {
     try {
-      const response = await axios.get<ResponeType>('http://95.216.153.158/api/approve',{ withCredentials: true });
+      const response = await axios.get<ResponeType>('http://95.216.153.158/api/approve', { withCredentials: true });
       console.log(response.data);
-      if(response.data.status === true)
-      {
+      if (response.data.status === true) {
         setData(response.data.data);
         setAdmin(true);
       }
-      else if(response.data.status == "notAdmin")
-      {
+      else if (response.data.status == "notAdmin") {
         alert("access denied");
         navigate("/profile")
       }
-      else
-      {
+      else {
         navigate("/login");
       }
-      
+
       setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -46,19 +43,16 @@ function Approve() {
       setLoading(false);
     }
   }
-  useEffect(() => {fetchData();}, []);
+  useEffect(() => { fetchData(); }, []);
   async function handleApprove(id: string) {
     try {
       console.log('Approving user with id: ', id);
-      const response = await axios.post('http://95.216.153.158/api/approve', { id },{ withCredentials: true });
-      if(response.data.status !== 200)
-      {
-        if(typeof response.data.status === 'string')
-        {
+      const response = await axios.post('http://95.216.153.158/api/approve', { id }, { withCredentials: true });
+      if (response.data.status !== 200) {
+        if (typeof response.data.status === 'string') {
           alert(response.data.status);
         }
-        else
-        {
+        else {
           alert("User not found");
         }
       }
@@ -69,7 +63,7 @@ function Approve() {
       fetchData();
     }
   }
-  
+
   async function handleDelete(id: string) {
     try {
       console.log('Deleting user with id: ', id);
@@ -92,13 +86,13 @@ function Approve() {
       fetchData();
     }
   }
-  
-  
-  
+
+
+
 
   return (
     <>
-      <Navbar admin={admin}/>
+      <Navbar admin={admin} />
       {loading ? (
         <p className='loading'>Loading data...</p>
       ) : status === 'notAdmin' ? (

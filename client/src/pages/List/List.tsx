@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import "./List.css"
-import type { UserData,ResponeType } from "./types"
-import Navbar from '../Navbar/Navbar';
+import type { UserData, ResponeType } from "./types"
+import Navbar from '../../components/navbar/Navbar';
 import { useNavigate } from 'react-router-dom';
 
 function List() {
@@ -12,7 +12,7 @@ function List() {
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
-    axios.get<ResponeType>('http://95.216.153.158/api/list',{ withCredentials: true })
+    axios.get<ResponeType>('http://95.216.153.158/api/list', { withCredentials: true })
       .then(response => {
         if (!response.data.status) {
           document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -27,11 +27,11 @@ function List() {
         console.error('Error fetching data:', error);
         setLoading(false);
       });
-  }, []);  
+  }, []);
 
   return (
     <>
-    <Navbar admin={admin}/>
+      <Navbar admin={admin} />
       {loading ? (
         <p className='loading'>Loading data...</p>
       ) : (

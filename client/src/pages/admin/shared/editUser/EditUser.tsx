@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../Navbar/Navbar";
+import Navbar from "../../../../components/navbar/Navbar";
 import type { UserData } from "./types";
 import axios from "axios";
 import { useCookies } from "react-cookie";

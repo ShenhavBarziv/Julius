@@ -1,9 +1,9 @@
 import React from 'react';
-import "./Navbar.css";
+import "./styles.css";
 import { useCookies } from "react-cookie";
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 
-function Navbar({admin=false}) {
+function Navbar({ admin = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [cookies, removeCookie] = useCookies(["token"]);

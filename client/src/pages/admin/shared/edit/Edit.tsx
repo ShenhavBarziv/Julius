@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../Navbar/Navbar';
-import './Edit.css'; // Import your new CSS file
+import Navbar from '../../../../components/navbar/Navbar';
+import './styles.css'; // Import your new CSS file
 import axios from 'axios';
 import type { ResponeType, UserData } from './types';
 import { useNavigate } from 'react-router-dom';
@@ -14,17 +14,15 @@ function Edit() {
   const [cookies, removeCookie] = useCookies(['token']);
   const [admin, setAdmin] = useState(false);
 
-  async function fetch()
-  {
+  async function fetch() {
     if (!cookies || !cookies.token) {
       navigate('/login');
     }
-    axios.get<ResponeType>('http://95.216.153.158/api/list',{ withCredentials: true })
+    axios.get<ResponeType>('http://95.216.153.158/api/list', { withCredentials: true })
       .then(response => {
         console.log(response.data);
-        if(response.data.status)
-        {
-          if(response.data.admin) {
+        if (response.data.status) {
+          if (response.data.admin) {
             setAdmin(true);
             setData(response.data.data);
           }
@@ -33,25 +31,24 @@ function Edit() {
             navigate("/profile");
           }
           setLoading(false);
-        } else{
+        } else {
           document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
           navigate("/login");
         }
         setLoading(false);
-        
+
       })
       .catch(error => {
         console.error('Error fetching data:', error);
         setLoading(false);
       });
   }
-  useEffect(() => {fetch()}, []);
+  useEffect(() => { fetch() }, []);
 
-  async function handleEdit(id: string) 
-  {
-      navigate('/admin/editUser',{state: id});
+  async function handleEdit(id: string) {
+    navigate('/admin/editUser', { state: id });
   }
-  
+
   async function handleDelete(id: string) {
     try {
       console.log(`Deleting user with id: ${id}`);
@@ -60,14 +57,14 @@ function Edit() {
     } catch (error) {
       console.error(`Error deleting user: ${error}`);
     }
-    finally{
-        fetch();
+    finally {
+      fetch();
     }
   }
 
   return (
     <>
-      <Navbar admin={admin}/>
+      <Navbar admin={admin} />
       {loading ? (
         <p className='loading'>Loading data...</p>
       ) : (

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Navbar from '../Navbar/Navbar';
-import './Admin.css';
+import Navbar from '../../components/navbar/Navbar';
+import './styles.css';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 
@@ -41,7 +41,7 @@ function Admin() {
 
   return (
     <>
-      <Navbar admin={isAdmin}/>
+      <Navbar admin={isAdmin} />
       {isAdmin && (
         <div className="admin-page">
           <h1>Welcome to the Admin Page</h1>

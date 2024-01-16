@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import "./Profile.css";
 import axios from 'axios';
 import { UserData } from './types';
-import Navbar from '../Navbar/Navbar';
+import Navbar from '../../components/navbar/Navbar';
 import { useCookies } from "react-cookie";
 import { useNavigate } from 'react-router-dom';
 
@@ -23,9 +23,9 @@ function Profile() {
       navigate("/login");
     }
 
-    axios.get("http://95.216.153.158/api/profile",{ withCredentials: true })
+    axios.get("http://95.216.153.158/api/profile", { withCredentials: true })
       .then(response => {
-        if(!response.data.status){
+        if (!response.data.status) {
           document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
           navigate('/login');
         }
@@ -40,7 +40,7 @@ function Profile() {
 
   return (
     <>
-      <Navbar admin={admin}/>
+      <Navbar admin={admin} />
       <div className="user-profile">
         <h1>User Profile</h1>
         {userData ? (
